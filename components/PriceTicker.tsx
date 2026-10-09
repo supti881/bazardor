@@ -31,12 +31,25 @@ function renderProductIcon(product: Record<string, unknown>) {
   const nameStr = String(product.nameBn || product.name || '');
 
   const isDal = categoryKey === 'dal' || slugStr.includes('dal') || nameStr.includes('ডাল');
+  const isAda = slugStr === 'ada' || nameStr.includes('আদা');
 
   if (isDal) {
     return (
       <Image 
         src="/icons8-beans-48.png" 
         alt="ডাল" 
+        width={18} 
+        height={18} 
+        className="object-contain shrink-0" 
+      />
+    );
+  }
+
+  if (isAda) {
+    return (
+      <Image 
+        src="/ginger.png" 
+        alt="আদা" 
         width={18} 
         height={18} 
         className="object-contain shrink-0" 

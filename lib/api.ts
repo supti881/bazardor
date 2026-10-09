@@ -1,20 +1,27 @@
-const BASE_URLS = [
-  'https://api.api-store.workers.dev/api/bazardor',
-  'https://api.abcz.workers.dev/api/bazardor'
-];
+const BASE_URL = 'https://api.abcz.workers.dev/api/bazardor';
 
-export async function fetchWithFallback<T>(endpoint: string): Promise<T> {
-  for (const baseUrl of BASE_URLS) {
-    try {
-      const res = await fetch(`${baseUrl}${endpoint}`, {
-        next: { revalidate: 60 }
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (error) {
-      console.warn(`Failed fetching from ${baseUrl}${endpoint}, trying fallback...`);
-    }
+
+export async function fetchWithFallback<T = unknown>(endpoint: string): Promise<T> {
+  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch from ${url}`);
   }
-  throw new Error(`Unable to fetch data from both API sources for endpoint: ${endpoint}`);
+  return res.json();
+}
+
+export async function getCategories() {
+  return fetchWithFallback('/categories');
+}
+
+export async function getAllProducts() {
+  return fetchWithFallback('/products');
+}
+
+export async function getProductsByCategory(categorySlug: string) {
+  return fetchWithFallback(`/products?category=${categorySlug}`);
+}
+
+export async function getProductById(id: string | number) {
+  return fetchWithFallback(`/products/${id}`);
 }
