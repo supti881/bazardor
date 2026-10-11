@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Firebase setup
+
+Copy `.env.example` to `.env.local` and fill in the Firebase web app values from
+Firebase Console → Project settings → Your apps. The sign-in and sign-up pages
+require a valid `NEXT_PUBLIC_FIREBASE_API_KEY`, auth domain, project ID, and app
+ID. Enable Email/Password under Firebase Console → Authentication → Sign-in
+method. Restart the development server after changing `.env.local`.
+
+If Firebase reports `auth/invalid-api-key`, verify the API key belongs to the
+same Firebase project and that its allowed HTTP referrers include your local
+and deployed application domains.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

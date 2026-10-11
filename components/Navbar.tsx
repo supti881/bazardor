@@ -1,9 +1,12 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { getFirebaseAuth, getFirebaseAuthErrorMessage } from '@/lib/firebase';
 import { Category, Product } from '@/types';
 import PriceTicker from './PriceTicker';
 
@@ -29,7 +32,40 @@ function BanglaDateDisplay() {
 
 export default function Navbar({ categories = [], tickerProducts = [] }: NavbarProps) {
   const pathname = usePathname();
-  console.log(pathname, "Current Pathname");
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+    let cancelled = false;
+
+    void Promise.resolve()
+      .then(() => {
+        if (cancelled) return;
+
+        unsubscribe = onAuthStateChanged(getFirebaseAuth(), (currentUser) => {
+          setUser(currentUser);
+          setLoading(false);
+        }, (error) => {
+          console.error('Navbar auth state listener failed:', error);
+          setLoading(false);
+        });
+      })
+      .catch((error: unknown) => {
+        console.error(
+          'Navbar Firebase initialization failed:',
+          getFirebaseAuthErrorMessage(error, 'Firebase চালু করা যায়নি।')
+        );
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
   const defaultCategories = [
     { name: 'চাল', slug: 'chal', icon: '🍚' },
@@ -73,19 +109,49 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
           </div>
         </Link>
 
+        {/* Dynamic Auth Section */}
         <div className="flex items-center gap-[6px]">
-          <Link 
-            href="/signin" 
-            className="h-[40px] px-[17px] py-[1px] flex items-center justify-center text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
-          >
-            সাইন ইন
-          </Link>
-          <Link 
-            href="/signup" 
-            className="bg-[#008a45] hover:bg-[#00763a] text-white text-sm font-semibold h-[40px] px-[17px] py-[1px] flex items-center justify-center rounded-[8px] shadow-sm transition-all"
-          >
-            সাইন আপ
-          </Link>
+          {loading ? (
+            <div className="w-24 h-[40px] bg-gray-200/60 animate-pulse rounded-[8px]"></div>
+          ) : user ? (
+            /* Logged in state */
+            <Link
+              href="/profile"
+              className="h-[40px] px-3 bg-white border border-gray-200/80 rounded-[8px] flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm"
+            >
+              <div className="w-6 h-6 rounded-md bg-[#008a45] text-white flex items-center justify-center font-bold text-xs overflow-hidden relative shrink-0">
+                {user.photoURL ? (
+                  <Image 
+                    src={user.photoURL} 
+                    alt="Profile" 
+                    fill 
+                    className="object-cover"
+                  />
+                ) : (
+                  user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'
+                )}
+              </div>
+              <span className="text-xs font-bold text-gray-800 max-w-[100px] truncate">
+                {user.displayName || 'প্রোফাইল'}
+              </span>
+            </Link>
+          ) : (
+            /* Logged out state */
+            <>
+              <Link 
+                href="/signin" 
+                className="h-[40px] px-[17px] py-[1px] flex items-center justify-center text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                সাইন ইন
+              </Link>
+              <Link 
+                href="/signup" 
+                className="bg-[#008a45] hover:bg-[#00763a] text-white text-sm font-semibold h-[40px] px-[17px] py-[1px] flex items-center justify-center rounded-[8px] shadow-sm transition-all"
+              >
+                সাইন আপ
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
