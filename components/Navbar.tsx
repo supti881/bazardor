@@ -1,13 +1,14 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
+import { usePathname, useRouter } from 'next/navigation';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { getFirebaseAuth, getFirebaseAuthErrorMessage } from '@/lib/firebase';
 import { Category, Product } from '@/types';
+import toast from 'react-hot-toast';
 import PriceTicker from './PriceTicker';
 
 interface NavbarProps {
@@ -32,8 +33,11 @@ function BanglaDateDisplay() {
 
 export default function Navbar({ categories = [], tickerProducts = [] }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let unsubscribe = () => {};
@@ -43,13 +47,17 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
       .then(() => {
         if (cancelled) return;
 
-        unsubscribe = onAuthStateChanged(getFirebaseAuth(), (currentUser) => {
-          setUser(currentUser);
-          setLoading(false);
-        }, (error) => {
-          console.error('Navbar auth state listener failed:', error);
-          setLoading(false);
-        });
+        unsubscribe = onAuthStateChanged(
+          getFirebaseAuth(),
+          (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+          },
+          (error) => {
+            console.error('Navbar auth state listener failed:', error);
+            setLoading(false);
+          }
+        );
       })
       .catch((error: unknown) => {
         console.error(
@@ -66,6 +74,29 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
       unsubscribe();
     };
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await signOut(getFirebaseAuth());
+      setDropdownOpen(false);
+      toast.success('সাইন আউট সফল হয়েছে!');
+      router.push('/signin');
+    } catch {
+      toast.error('সাইন আউট করতে সমস্যা হয়েছে!');
+    }
+  };
 
   const defaultCategories = [
     { name: 'চাল', slug: 'chal', icon: '🍚' },
@@ -110,31 +141,69 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
         </Link>
 
         {/* Dynamic Auth Section */}
-        <div className="flex items-center gap-[6px]">
+        <div className="flex items-center gap-[6px] relative" ref={dropdownRef}>
           {loading ? (
             <div className="w-24 h-[40px] bg-gray-200/60 animate-pulse rounded-[8px]"></div>
           ) : user ? (
-            /* Logged in state */
-            <Link
-              href="/profile"
-              className="h-[40px] px-3 bg-white border border-gray-200/80 rounded-[8px] flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm"
-            >
-              <div className="w-6 h-6 rounded-md bg-[#008a45] text-white flex items-center justify-center font-bold text-xs overflow-hidden relative shrink-0">
-                {user.photoURL ? (
-                  <Image 
-                    src={user.photoURL} 
-                    alt="Profile" 
-                    fill 
-                    className="object-cover"
-                  />
-                ) : (
-                  user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'
-                )}
-              </div>
-              <span className="text-xs font-bold text-gray-800 max-w-[100px] truncate">
-                {user.displayName || 'প্রোফাইল'}
-              </span>
-            </Link>
+            /* Logged in state with Dropdown */
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-all text-left focus:outline-none"
+              >
+                <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden relative shrink-0 border border-gray-200">
+                  {user.photoURL ? (
+                    <Image
+                      src={user.photoURL}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#008a45] text-white flex items-center justify-center font-bold text-xs">
+                      {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs font-bold text-gray-800 max-w-[100px] truncate">
+                  {user.displayName?.split(' ')[0] || 'ইউজার'}
+                </span>
+                <span className="text-[10px] text-gray-500">▾</span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 p-4 z-50 space-y-3 font-sans">
+                  <div className="border-b border-gray-100 pb-3">
+                    <p className="text-sm font-bold text-gray-900 truncate">
+                      {user.displayName || 'ব্যবহারকারী'}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Link
+                      href="/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+                    >
+                      <span>👤</span>
+                      <span>আমার প্রোফাইল</span>
+                    </Link>
+
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2 px-2 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left"
+                    >
+                      <span>↩</span>
+                      <span>সাইন আউট</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             /* Logged out state */
             <>
