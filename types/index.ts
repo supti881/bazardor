@@ -1,12 +1,21 @@
 export interface Product {
   id: number | string;
-  name: string;
-  emoji: string;
-  unit: string;
+  name?: string;
+  nameBn?: string;
+  emoji?: string;
+  image?: string;
+  categoryIcon?: string;
+  unit?: string;
   price?: number | string;
+  today?: number | string;
   todayPrice?: number | string;
-  changePercent: number;
+  changePercent?: number;
+  change?: {
+    dir?: string;
+    pct?: number | string;
+  };
   category: string;
+  categoryNameBn?: string;
   slug: string;
   description?: string;
   minPrice?: number | string;
@@ -20,7 +29,8 @@ export interface Product {
 
 export interface Category {
   id: number | string;
-  name: string;
+  name?: string;
+  nameBn?: string;
   slug: string;
   icon?: string;
 }

@@ -4,9 +4,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getAllProducts } from "@/lib/api";
+import type { Product } from "@/types";
 import { useEffect, useState } from "react";
-
-type Product = Record<string, unknown>;
 
 function toBanglaNumber(strNum: string | number): string {
   const banglaDigits: Record<string, string> = {
@@ -90,7 +89,7 @@ export default function HomePage() {
         console.log("Fetched products:", rawData);
 
         if (isMounted) {
-          setProducts(Array.isArray(rawData) ? rawData as Product[] : []);
+          setProducts(Array.isArray(rawData) ? rawData : []);
           setError("");
         }
       } catch (err) {
@@ -144,7 +143,7 @@ export default function HomePage() {
 
             <div>
               <Link
-                href="#all-products"
+                href="/allProduct"
                 className="inline-flex items-center gap-2 bg-[#008a45] hover:bg-[#00763a] text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-sm transition-all"
               >
                 সব পণ্য দেখুন

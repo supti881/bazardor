@@ -1,3 +1,5 @@
+import type { Category, Product } from '@/types';
+
 const BASE_URL = 'https://openapi.programming-hero.com/api/bazardor';
 
 
@@ -28,17 +30,19 @@ export async function fetchWithFallback<T = unknown>(
 }
 
 export async function getCategories() {
-  return fetchWithFallback('/categories');
+  return fetchWithFallback<Category[]>('/categories');
 }
 
 export async function getAllProducts() {
-  return fetchWithFallback('/products');
+  return fetchWithFallback<Product[]>('/products');
 }
 
 export async function getProductsByCategory(categorySlug: string) {
-  return fetchWithFallback(`/products?category=${categorySlug}`);
+  return fetchWithFallback<Product[]>(
+    `/products?category=${encodeURIComponent(categorySlug)}`
+  );
 }
 
 export async function getProductById(id: string | number) {
-  return fetchWithFallback(`/products/${id}`);
+  return fetchWithFallback<Product>(`/products/${encodeURIComponent(String(id))}`);
 }

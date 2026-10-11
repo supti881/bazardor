@@ -32,36 +32,23 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
   console.log(pathname, "Current Pathname");
 
   const defaultCategories = [
-    { name: 'চাল', slug: 'chal', iconNode: <span className="text-base leading-none">🍚</span> },
-    { 
-      name: 'ডাল', 
-      slug: 'dal', 
-      iconNode: (
-        <Image 
-          src="/icons8-beans-48.png" 
-          alt="ডাল" 
-          width={20} 
-          height={20} 
-          className="object-contain shrink-0" 
-        />
-      ) 
-    },
-    { name: 'তেল', slug: 'tel', iconNode: <span className="text-base leading-none">🛢️</span> },
-    { name: 'সবজি', slug: 'sobji', iconNode: <span className="text-base leading-none">🥬</span> },
-    { name: 'মাছ', slug: 'mach', iconNode: <span className="text-base leading-none">🐟</span> },
-    { name: 'মাংস', slug: 'mangso', iconNode: <span className="text-base leading-none">🍗</span> },
-    { name: 'ডিম-দুধ', slug: 'dim-dudh', iconNode: <span className="text-base leading-none">🥛</span> },
-    { name: 'মসলা', slug: 'mosla', iconNode: <span className="text-base leading-none">🌶️</span> },
+    { name: 'চাল', slug: 'chal', icon: '🍚' },
+    { name: 'ডাল', slug: 'dal', icon: '🫘' },
+    { name: 'তেল', slug: 'tel', icon: '🛢️' },
+    { name: 'সবজি', slug: 'sobji', icon: '🥬' },
+    { name: 'মাছ', slug: 'mach', icon: '🐟' },
+    { name: 'মাংস', slug: 'mangsho', icon: '🍗' },
+    { name: 'ডিম-দুধ', slug: 'dim-dui', icon: '🥛' },
+    { name: 'মসলা', slug: 'mosla', icon: '🌶️' },
   ];
 
-  const categoryList = defaultCategories.map((defCat) => {
-    const apiCat = categories.find((c) => c.slug === defCat.slug);
-    return {
-      slug: defCat.slug,
-      name: apiCat?.name || defCat.name,
-      iconNode: defCat.iconNode,
-    };
-  });
+  const categoryList = categories.length > 0
+    ? categories.map((category) => ({
+        slug: category.slug,
+        name: category.nameBn || category.name || category.slug,
+        icon: category.icon || '🛍️',
+      }))
+    : defaultCategories;
 
   return (
     <header className="w-full bg-[#f8faf9] border-b border-gray-200">
@@ -116,7 +103,7 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
                   isActive ? 'text-[#008a45] bg-emerald-50' : 'text-gray-800 hover:text-[#008a45]'
                 }`}
               >
-                {cat.iconNode}
+                <span className="text-base leading-none">{cat.icon}</span>
                 <span className="text-gray-900 font-extrabold">{cat.name}</span>
               </Link>
             );
