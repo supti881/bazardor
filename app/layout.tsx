@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { fetchWithFallback } from "@/lib/api";
 import { Category, Product } from "@/types";
 import { Suspense } from "react";
+import Footer from '@/components/Footer';
 
 const geist = Geist({
   subsets: ["latin"],
@@ -42,6 +43,7 @@ export default async function RootLayout({
          <Navbar categories={categories} tickerProducts={products} />
           {children}
         </Suspense>
+        <Footer />
       </body>
     </html>
   );
