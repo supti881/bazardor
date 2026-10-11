@@ -16,10 +16,50 @@ const categoryBanglaMap: Record<string, string> = {
   sobji: 'সবজি',
   mach: 'মাছ',
   mangso: 'মাংস',
+  mangsho: 'মাংস',
   egg: 'ডিম-দুধ',
   'egg-milk': 'ডিম-দুধ',
+  'dim-dui': 'ডিম-দুধ',
   masala: 'মসলা',
+  mosla: 'মসলা',
 };
+
+// Dynamic Category Banner Icon Helper
+function getCategoryIcon(slug: string): string {
+  const s = slug.toLowerCase();
+  if (s === 'chal' || s.includes('chal')) return '🍚';
+  if (s === 'dal' || s.includes('dal')) return '🫘';
+  if (s === 'tel' || s.includes('tel')) return '🛢️';
+  if (s === 'sobji' || s.includes('sobji')) return '🥬';
+  if (s === 'mach' || s.includes('mach')) return '🐟';
+  if (s === 'mangso' || s === 'mangsho' || s.includes('mangsho')) return '🍗';
+  if (s === 'egg' || s === 'egg-milk' || s === 'dim-dui' || s.includes('dim')) return '🥛';
+  if (s === 'masala' || s === 'mosla' || s.includes('mosla')) return '🌶️';
+  return '🛍️';
+}
+
+// Dynamic Product Card Icon Helper
+function getProductIcon(prodObj: Record<string, unknown>, categorySlug: string): string {
+  const productName = String(prodObj.nameBn || prodObj.name || prodObj.title || '').toLowerCase();
+  const rawIcon = String(prodObj.icon || prodObj.emoji || prodObj.categoryIcon || '');
+
+  // If a valid emoji is already provided and not a generic red flag/placeholder
+  if (rawIcon && !rawIcon.includes('http') && !rawIcon.includes('/') && rawIcon !== '🛍️') {
+    return rawIcon;
+  }
+
+  // Name & Slug based matching
+  if (categorySlug.includes('tel') || productName.includes('তেল')) return '🛢️';
+  if (categorySlug.includes('chal') || productName.includes('চাল')) return '🍚';
+  if (categorySlug.includes('dal') || productName.includes('ডাল')) return '🫘';
+  if (categorySlug.includes('sobji') || productName.includes('সবজি') || productName.includes('আলু') || productName.includes('পেঁয়াজ')) return '🥬';
+  if (categorySlug.includes('mach') || productName.includes('মাছ')) return '🐟';
+  if (categorySlug.includes('mangsho') || categorySlug.includes('mangso') || productName.includes('মাংস')) return '🍗';
+  if (categorySlug.includes('dim') || categorySlug.includes('egg') || productName.includes('দুধ') || productName.includes('ডিম')) return '🥛';
+  if (categorySlug.includes('mosla') || categorySlug.includes('masala') || productName.includes('মরিচ') || productName.includes('রসুন')) return '🌶️';
+
+  return getCategoryIcon(categorySlug);
+}
 
 function toBanglaNumber(value: number | string): string {
   const banglaDigits: Record<string, string> = {
@@ -126,7 +166,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
         {/* Category Header Card */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100/60 flex items-center gap-4">
           <div className="w-14 h-14 bg-gray-100/80 rounded-full flex items-center justify-center text-2xl shrink-0">
-            🍚
+            {getCategoryIcon(categorySlug)}
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">
@@ -178,7 +218,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
               const isDown = change < 0;
               const productId = String(product.id || prodObj._id || idx);
               const productName = String(prodObj.nameBn || product.name || prodObj.title || 'অজানা পণ্য');
-              const icon = String(prodObj.icon || '🍚');
+              const icon = getProductIcon(prodObj, categorySlug);
 
               return (
                 <div 

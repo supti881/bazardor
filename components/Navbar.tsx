@@ -16,6 +16,27 @@ interface NavbarProps {
   tickerProducts?: Product[];
 }
 
+const categoryIcons: Record<string, string> = {
+  chal: '🍚',
+  চাল: '🍚',
+  dal: '🫘',
+  ডাল: '🫘',
+  tel: '🛢️',
+  তেল: '🛢️',
+  sobji: '🥬',
+  সবজি: '🥬',
+  mach: '🐟',
+  মাছ: '🐟',
+  mangsho: '🍗',
+  mangso: '🍗',
+  মাংস: '🍗',
+  'dim-dui': '🥛',
+  'dim-dudh': '🥛',
+  'ডিম-দুধ': '🥛',
+  mosla: '🌶️',
+  মসলা: '🌶️',
+};
+
 function BanglaDateDisplay() {
   const todayBanglaDate = new Date().toLocaleDateString('bn-BD', {
     weekday: 'long',
@@ -113,7 +134,11 @@ export default function Navbar({ categories = [], tickerProducts = [] }: NavbarP
     ? categories.map((category) => ({
         slug: category.slug,
         name: category.nameBn || category.name || category.slug,
-        icon: category.icon || '🛍️',
+        icon:
+          categoryIcons[category.slug.trim().toLowerCase()] ||
+          categoryIcons[(category.nameBn || category.name || '').trim()] ||
+          category.icon ||
+          '🛍️',
       }))
     : defaultCategories;
 
