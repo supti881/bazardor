@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProductById } from '@/lib/api';
+import { Suspense } from 'react';
 
 function toBanglaNumber(strNum: string | number): string {
   const banglaDigits: { [key: string]: string } = {
@@ -61,7 +62,23 @@ interface ProductDetailsPageProps {
   }>;
 }
 
-export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
+export default function ProductDetailsPage({ params }: ProductDetailsPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#f8faf9] py-8">
+          <div className="container mx-auto max-w-5xl px-4 sm:px-8">
+            <p className="text-center text-gray-500 py-8">পণ্যের তথ্য লোড হচ্ছে...</p>
+          </div>
+        </main>
+      }
+    >
+      <ProductDetails params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductDetails({ params }: ProductDetailsPageProps) {
   const { id } = await params;
   let product: Record<string, unknown> | null = null;
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { fetchWithFallback } from "@/lib/api";
 import { Category, Product } from "@/types";
+import { Suspense } from "react";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -34,10 +35,13 @@ export default async function RootLayout({
     <html lang="bn" data-theme="light">
       <body className={`${geist.className} min-h-screen bg-base-100 text-base-content antialiased`}>
         {/* top navigation bar with dynamic categories and marquee price ticker */}
-        <Navbar categories={categories} tickerProducts={products} />
+       
         
         {/* main page content */}
-        {children}
+        <Suspense fallback={<div className="text-center mt-10">Loading...</div>}>
+         <Navbar categories={categories} tickerProducts={products} />
+          {children}
+        </Suspense>
       </body>
     </html>
   );

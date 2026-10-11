@@ -29,6 +29,7 @@ function BanglaDateDisplay() {
 
 export default function Navbar({ categories = [], tickerProducts = [] }: NavbarProps) {
   const pathname = usePathname();
+  console.log(pathname, "Current Pathname");
 
   const defaultCategories = [
     { name: 'চাল', slug: 'chal', iconNode: <span className="text-base leading-none">🍚</span> },
