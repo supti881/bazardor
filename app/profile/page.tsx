@@ -2,18 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { getFirebaseAuth, getFirebaseAuthErrorMessage } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +25,6 @@ export default function ProfilePage() {
       unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         if (currentUser) {
           setUser(currentUser);
-          setName(currentUser.displayName || '');
         } else {
           router.push('/signin');
         }
@@ -45,34 +43,20 @@ export default function ProfilePage() {
     };
   }, [router]);
 
-  // Name Update Handler
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+ // Sign Out Handler
+const handleSignOut = async () => {
+  try {
+    await signOut(getFirebaseAuth());
+    
+    toast.success('সাইন আউট সফল হয়েছে!');
 
-    setUpdating(true);
-    try {
-      const currentUser = getFirebaseAuth().currentUser;
-      if (!currentUser) return;
-      await updateProfile(currentUser, { displayName: name });
-      setUser({ ...currentUser });
-      toast.success('নাম সফলভাবে আপডেট হয়েছে!');
-    } catch {
-      toast.error('নাম আপডেট করতে সমস্যা হয়েছে!');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  // Sign Out Handler
-  const handleSignOut = async () => {
-    try {
-      await signOut(getFirebaseAuth());
-      toast.success('সাইন আউট সফল হয়েছে!');
+    setTimeout(() => {
       router.push('/signin');
-    } catch {
-      toast.error('সাইন আউট করতে সমস্যা হয়েছে!');
-    }
-  };
+    }, 1000);
+  } catch {
+    toast.error('সাইন আউট করতে সমস্যা হয়েছে!');
+  }
+};
 
   if (loading) {
     return (
@@ -137,31 +121,25 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Update Form Card */}
+        {/* Info & Navigation Card to Update Route */}
         <div className="bg-[#fcfdfe] rounded-2xl p-6 shadow-sm border border-gray-200/60 space-y-4">
           <h3 className="text-sm font-bold text-gray-900">তথ্য</h3>
 
-          <form onSubmit={handleUpdate} className="space-y-4 text-xs">
+          <div className="space-y-3 text-xs">
             <div>
-              <label className="block text-gray-700 font-bold mb-1.5">নাম</label>
-              <input 
-                type="text" 
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="আপনার নাম লিখুন"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#008a45] transition-all shadow-sm"
-              />
+              <p className="text-gray-500 font-semibold mb-0.5">নাম</p>
+              <p className="text-sm font-bold text-gray-800">
+                {user?.displayName || 'নাম প্রদান করা হয়নি'}
+              </p>
             </div>
 
-            <button 
-              type="submit"
-              disabled={updating}
-              className="w-full py-3 bg-[#008a45] hover:bg-[#00763a] text-white font-bold rounded-xl transition-all shadow text-xs disabled:opacity-50 active:scale-[0.99]"
+            <Link 
+              href="/profile/update"
+              className="inline-block w-full text-center py-3 bg-[#008a45] hover:bg-[#00763a] text-white font-bold rounded-xl transition-all shadow text-xs active:scale-[0.99]"
             >
-              {updating ? 'আপডেট হচ্ছে...' : 'আপডেট'}
-            </button>
-          </form>
+              তথ্য আপডেট করুন
+            </Link>
+          </div>
         </div>
 
       </div>

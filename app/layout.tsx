@@ -6,6 +6,7 @@ import { fetchWithFallback } from "@/lib/api";
 import { Category, Product } from "@/types";
 import { Suspense } from "react";
 import Footer from '@/components/Footer';
+import { Toaster } from 'react-hot-toast';
 
 const geist = Geist({
   subsets: ["latin"],
@@ -35,14 +36,15 @@ export default async function RootLayout({
   return (
     <html lang="bn" data-theme="light">
       <body className={`${geist.className} min-h-screen bg-base-100 text-base-content antialiased`}>
-        {/* top navigation bar with dynamic categories and marquee price ticker */}
-       
-        
+        {/* Toast Container for App-wide Notifications */}
+        <Toaster position="top-center" reverseOrder={false} />
+
         {/* main page content */}
         <Suspense fallback={<div className="text-center mt-10">Loading...</div>}>
-         <Navbar categories={categories} tickerProducts={products} />
+          <Navbar categories={categories} tickerProducts={products} />
           {children}
         </Suspense>
+        
         <Footer />
       </body>
     </html>

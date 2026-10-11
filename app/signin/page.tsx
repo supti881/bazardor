@@ -10,6 +10,7 @@ import {
   signInWithPopup 
 } from 'firebase/auth';
 import { getFirebaseAuth, getFirebaseAuthErrorMessage } from '@/lib/firebase';
+import toast from 'react-hot-toast';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -26,11 +27,15 @@ export default function SignInPage() {
     try {
       const auth = getFirebaseAuth();
       await signInWithEmailAndPassword(auth, email, password);
-      alert('সফলভাবে সাইন ইন করেছেন!');
-      router.push('/');
+      toast.success('সফলভাবে সাইন ইন করেছেন!');
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } catch (err: unknown) {
       console.error('Sign-in failed:', err);
-      setError(getFirebaseAuthErrorMessage(err, 'ইমেইল অথবা পাসওয়ার্ড সঠিক নয়!'));
+      const errMsg = getFirebaseAuthErrorMessage(err, 'ইমেইল অথবা পাসওয়ার্ড সঠিক নয়!');
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -42,11 +47,15 @@ export default function SignInPage() {
     try {
       const auth = getFirebaseAuth();
       await signInWithPopup(auth, provider);
-      alert('Google দিয়ে সফলভাবে সাইন ইন হয়েছে!');
-      router.push('/');
+      toast.success('Google দিয়ে সফলভাবে সাইন ইন হয়েছে!');
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } catch (err: unknown) {
       console.error('Google sign-in failed:', err);
-      setError(getFirebaseAuthErrorMessage(err, 'Google সাইন ইন করতে সমস্যা হয়েছে।'));
+      const errMsg = getFirebaseAuthErrorMessage(err, 'Google সাইন ইন করতে সমস্যা হয়েছে।');
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 
@@ -56,11 +65,15 @@ export default function SignInPage() {
     try {
       const auth = getFirebaseAuth();
       await signInWithPopup(auth, provider);
-      alert('GitHub দিয়ে সফলভাবে সাইন ইন হয়েছে!');
-      router.push('/');
+      toast.success('GitHub দিয়ে সফলভাবে সাইন ইন হয়েছে!');
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } catch (err: unknown) {
       console.error('GitHub sign-in failed:', err);
-      setError(getFirebaseAuthErrorMessage(err, 'GitHub সাইন ইন করতে সমস্যা হয়েছে।'));
+      const errMsg = getFirebaseAuthErrorMessage(err, 'GitHub সাইন ইন করতে সমস্যা হয়েছে।');
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 
